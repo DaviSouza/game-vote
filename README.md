@@ -6,4 +6,5 @@ Technologies and libs useds
 
 -Python
 -Flask
+-postgree
 (not finish yet)
