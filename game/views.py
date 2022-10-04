@@ -1,7 +1,7 @@
 from flask import request, jsonify, Blueprint, abort
 from flask.views import MethodView
 from app import db, app
-from game.models import Game
+from game.models import Game, Sale, Store
 
 game_store = Blueprint('game_store', __name__)
 sucess = {"result": 200}
@@ -48,8 +48,8 @@ class GameView(MethodView):
         image_ = data['image'] if 'image' in data else None
         new_game = Game(name=data['name'], studio=data['studio'], image=image_, console=data['console'],
                         category=data['category'], price=data['price'])
-        #db.session.add(new_game)
-        #db.session.commit()
+        # db.session.add(new_game)
+        # db.session.commit()
         return new_game.fs_get_delete_put_post(None)
 
     def put(self):
@@ -67,7 +67,7 @@ class GameView(MethodView):
         db.session.commit()
         """
         updated_game = Game(name=data['name'], studio=data['studio'], image=image_, console=data['console'],
-                        category=data['category'], price=data['price'])
+                            category=data['category'], price=data['price'])
 
         return updated_game.fs_get_delete_put_post(data['id'])
 
@@ -77,10 +77,43 @@ class GameView(MethodView):
         return sucess
 
 
+class SaleView(MethodView):
+    def post(self):
+        data = request.json
+        new_sale = Sale(game_id=data['game_id'], user_id=data['user_id'],
+                        amount=data['amount'], price=data['price'])
+        new_sale.fs_get_delete_put_post(None)
+
+        new_store = Store(amount=data['amount'], price=data['price'])
+        return new_store.fs_get_delete_put_post(None)
+
+    def get(self, id=None, page=1):
+        if not id:
+            sales = Sale.query.paginate(page, 10).items
+            res = {}
+            for sale in sales:
+                res[sale.id] = {
+                    'game_id': sale.game_id,
+                    'user_id': sale.user_id,
+                    'amount': sale.amount,
+                    'price': sale.price
+                }
+        else:
+            return Sale.fs_get_delete_put_post()
+
+
 game_view = GameView.as_view('game_view')
+sale_view = SaleView.as_view('sale_view')
+
 app.add_url_rule(
     '/game/', view_func=game_view, methods=['GET', 'POST', 'PUT']
 )
 app.add_url_rule(
     '/game/<int:id>', view_func=game_view, methods=['GET', 'DELETE']
+)
+app.add_url_rule(
+    '/sale/', view_func=sale_view, methods=['GET', 'POST']
+)
+app.add_url_rule(
+    '/sale/<int:id>', view_func=sale_view, methods=['GET']
 )

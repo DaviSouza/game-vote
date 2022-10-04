@@ -19,3 +19,23 @@ class Game(fs_mixin, db.Model):
 
     def __repr__(self):
         return '<id {}>'.format(self.id)
+
+
+class Store(fs_mixin, db.Model):
+    __tablename__ = 'store'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    amount = db.Column(db.Integer)
+    game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
+
+    __fs_create_fields__ = __fs_update_fields__ = ['game_id', 'amount']
+
+
+class Sale(fs_mixin, db.Model):
+    __tablename__ = 'sale'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
+    user_id = db.Column(db.Integer)
+    amount = db.Column(db.Integer)
+    price = db.Column(db.Float(asdecimal=True))
+
+    __fs_create_fields__ = __fs_update_fields__ = ['game_id', 'user_id', 'amount', 'price']
