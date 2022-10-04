@@ -39,3 +39,14 @@ class Sale(fs_mixin, db.Model):
     price = db.Column(db.Float(asdecimal=True))
 
     __fs_create_fields__ = __fs_update_fields__ = ['game_id', 'user_id', 'amount', 'price']
+
+
+class Rating(fs_mixin, db.Model):
+    __tablename__ = 'rating'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    game_id = db.Column(db.Integer, db.ForeignKey('game.id'))
+    comment = db.Column(db.String())
+    user_id = db.Column(db.Integer)
+    grade = db.Column(db.Integer)
+
+    __fs_create_fields__ = __fs_update_fields__ = ['game_id', 'user_id', 'comment', 'grade']
