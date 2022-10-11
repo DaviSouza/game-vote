@@ -1,7 +1,7 @@
 from flask import request, jsonify, Blueprint, abort
 from flask.views import MethodView
 from app import db, app
-from game.models import Game, Sale, Store
+from game.models import Game, Order, Store
 
 game_store = Blueprint('game_store', __name__)
 sucess = {"result": 200}
@@ -77,11 +77,11 @@ class GameView(MethodView):
         return sucess
 
 
-class SaleView(MethodView):
+class OrderView(MethodView):
     def post(self):
         data = request.json
-        new_sale = Sale(game_id=data['game_id'], user_id=data['user_id'],
-                        amount=data['amount'], price=data['price'])
+        new_sale = Order(game_id=data['game_id'], user_id=data['user_id'],
+                         amount=data['amount'], price=data['price'])
         new_sale.fs_get_delete_put_post(None)
 
         new_store = Store(amount=data['amount'], price=data['price'])
@@ -89,21 +89,22 @@ class SaleView(MethodView):
 
     def get(self, id=None, page=1):
         if not id:
-            sales = Sale.query.paginate(page, 10).items
+            orders = Order.query.paginate(page, 10).items
             res = {}
-            for sale in sales:
-                res[sale.id] = {
-                    'game_id': sale.game_id,
-                    'user_id': sale.user_id,
-                    'amount': sale.amount,
-                    'price': sale.price
+            for order in orders:
+                res[order.id] = {
+                    'id': order.id,
+                    'game_id': order.game_id,
+                    'user_id': order.user_id,
+                    'amount': order.amount,
+                    'price': order.price
                 }
         else:
-            return Sale.fs_get_delete_put_post()
+            return Order.fs_get_delete_put_post()
 
 
 game_view = GameView.as_view('game_view')
-sale_view = SaleView.as_view('sale_view')
+order_view = OrderView.as_view('order_view')
 
 app.add_url_rule(
     '/game/', view_func=game_view, methods=['GET', 'POST', 'PUT']
@@ -112,8 +113,11 @@ app.add_url_rule(
     '/game/<int:id>', view_func=game_view, methods=['GET', 'DELETE']
 )
 app.add_url_rule(
-    '/sale/', view_func=sale_view, methods=['GET', 'POST']
+    '/order/', view_func=order_view, methods=['GET', 'POST']
 )
 app.add_url_rule(
-    '/sale/<int:id>', view_func=sale_view, methods=['GET']
+    '/order/<int:id>', view_func=order_view, methods=['GET']
+)
+app.add_url_rule(
+    '/payment/', view_func=game_view, methods=['GET', 'POST', 'PUT']
 )
